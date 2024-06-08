@@ -1,6 +1,6 @@
 Package: SupISD
-Title: Testing for distributional/tail structural change with unknown break 
-       in time-series data
+Title: Test for Distributional/Tail Structural Change with Unknown Break 
+       in Time-Series Data
 Version: 0.0.0.9000
 Authors@R: c(
     person("Hanjun", "Lu", , "hlu28@ncsu.edu", role = c("aut", "cre", "cph"),
