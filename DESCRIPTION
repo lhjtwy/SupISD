@@ -8,10 +8,11 @@ Authors@R: c(
     person("Alan", "Ker", , role = "aut")
     )
 Description: A Sup-type nonparametric test for structural change with an 
-             unknown break in time-series data. The test has power against 
-             structural change in any moment and can be tailored to a specific 
-             range of the underlying distribution. For details, please see 
-             Lu and Ker (2024) <doi.org/10.1093/jrsssc/qlae020>
+             unknown break in independently distributed time-series data. The 
+             test has power against structural change in any moment and can be 
+             tailored to a specific range of the underlying distribution. For 
+             details, please see Lu and Ker (2024) 
+             <doi.org/10.1093/jrsssc/qlae020>
              [This version is for test only].
 Imports: 
         stats
