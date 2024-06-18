@@ -199,7 +199,7 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, evalrange.l = NULL,
 
   ################################### Bootstrap Null
   if (null == "ran"){
-    print("Recovering the null distribution using randomization method could take some time. Thank you for your patience.")
+    start.time<-Sys.time()
     ISD_sup.null <- matrix(0, S)
     est_f.B <- matrix(0, length(grid))
     est_g.B <- matrix(0, length(grid))
@@ -264,6 +264,12 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, evalrange.l = NULL,
         ISDresult.null[t,] <- ISD_hat
       }
       ISD_sup.null[s] <- max(ISDresult.null)
+
+      end.time<-Sys.time()
+      time.taken<-as.numeric(round(end.time - start.time))
+      if (time.taken!=0 & time.taken%%60==0){
+        print("Recovering the null distribution using randomization method could take some time. Thank you for your patience.")
+      }
     }
 
     #p value
