@@ -199,8 +199,7 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, evalrange.l = NULL,
 
   ################################### Bootstrap Null
   if (null == "ran"){
-    print("Recovering the null distribution using randomization method could
-          take some time. Thank you for your patience.")
+    print("Recovering the null distribution using randomization method could take some time. Thank you for your patience.")
     ISD_sup.null <- matrix(0, S)
     est_f.B <- matrix(0, length(grid))
     est_g.B <- matrix(0, length(grid))
