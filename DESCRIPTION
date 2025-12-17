@@ -1,0 +1,21 @@
+Package: SupISD
+Title: Testing for distributional/tail structural change with unknown break 
+       in time-series data
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Hanjun", "Lu", , "hlu28@ncsu.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0004-6566-0648")),
+    person("Alan", "Ker", , role = "aut")
+    )
+Description: A Sup-type nonparametric test for structural change with an 
+             unknown break in time-series data. The test has power against 
+             structural change in any moment and can be tailored to a specific 
+             range of the underlying distribution. For details, please see 
+             Lu and Ker (2024) <doi.org/10.1093/jrsssc/qlae020>
+             [This version is for test only].
+Imports: 
+        stats
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+License: MIT + file LICENSE
