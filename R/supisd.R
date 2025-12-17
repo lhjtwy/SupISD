@@ -26,6 +26,9 @@
 #'        maximum of the data.
 #' @param width space between the points in the grid for kernel estimation.
 #'        Default results in 500 points at which the density is estimated.
+#' @param null method to recover null distribution of the test. Either "ran"
+#'        indicating randomization method or "asy" indicating asymptotic
+#'        distribution. Default is randomization method.
 #' @param S number of simulations for generating the null distribution of the
 #'        test statistic. Default is 1000.
 #'
@@ -35,10 +38,12 @@
 #' against structural change in any moment and can be tailored to a specific
 #' range of the underlying distribution. The function uses Gaussian kernel
 #' function and leave-one-out cross validation for finding the optimal bandwidth
-#' for kernel estimation. Test p value is found via randomization method as
-#' detailed in Lu and Ker (2024). It is suggested by simulations that the
-#' possible breaks to be tested should not be too close to the start/end of
-#' data (leaving at least 20 observations from the start/end is recommended).
+#' for kernel estimation. Test p value is found via randomization method by
+#' default setting as it performs better empirically than the asymptotic null
+#' distribution. However, the latter is also made available in cases of large
+#' samples. It is suggested by simulations that the possible breaks to be
+#' tested should not be too close to the start/end of data (leaving at least 20
+#' observations from the start/end is recommended).
 #'
 #' @return test statistic, estimated break and p value
 #'
@@ -65,7 +70,8 @@
 #' @export
 
 supisd <- function(data, breakstart = NULL, breakend = NULL, breaklength = NULL,
-                   evalrange.l = NULL, evalrange.r = NULL, width = NULL, S = NULL){
+                   evalrange.l = NULL, evalrange.r = NULL, width = NULL,
+                   null = "ran", S = NULL){
 
   T <- length(data)
   if (T <= 50) {warning("Small sample size")}
@@ -195,78 +201,94 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, breaklength = NULL,
   ISD_sup <- max(ISDresult)
   t_star <- as.numeric(rownames(ISDresult)[which.max(apply(ISDresult,MARGIN=1,max))])
 
+
   ################################### Bootstrap Null
-  ISD_sup.null <- matrix(0, S)
-  est_f.B <- matrix(0, length(grid))
-  est_g.B <- matrix(0, length(grid))
+  if (null == "ran"){
+    start.time<-Sys.time()
+    ISD_sup.null <- matrix(0, S)
+    est_f.B <- matrix(0, length(grid))
+    est_g.B <- matrix(0, length(grid))
 
-  ISDresult.null <- matrix(0, length(breakset))
-  rownames(ISDresult.null) <- seq(breakstart,breakend,1)
+    ISDresult.null <- matrix(0, length(breakset))
+    rownames(ISDresult.null) <- seq(breakstart,breakend,1)
 
-  f <- data[1:t_star]
-  g <- data[(t_star+1):T]
-  n_f <- length(f)
-  n_g <- length(g)
-  #optimal h for f
-  mlcv.f <- matrix(0, length(f))
-  MLCV.f <- function(h_f){
-    for(i in 1:length(f)){
-      mlcv.f[i] <- (sum(dnorm((f[i] - f)/h_f))-dnorm(0))/((n_f-1)*h_f)
-    }
-    likelihood.f <- sum(log(mlcv.f))/n_f
-    return(likelihood.f)
-  }
-  H_f <- optimize(MLCV.f,c(0.001, 100),maximum = TRUE)
-  h_f <- H_f[["maximum"]]
-  #optimal h for g
-  mlcv.g <- matrix(0, length(g))
-  MLCV.g <- function(h_g){
-    for(i in 1:length(g)){
-      mlcv.g[i] <- (sum(dnorm((g[i] - g)/h_g))-dnorm(0))/((n_g-1)*h_g)
-    }
-    likelihood.g <- sum(log(mlcv.g))/n_g
-    return(likelihood.g)
-  }
-  H_g <- optimize(MLCV.g,c(0.001, 100),maximum = TRUE)
-  h_g <- H_g[["maximum"]]
-
-  for (s in 1:S){
-    temp.var <- sample(data,T,replace = FALSE)
-    for (t in breakset){
-      f.B <- temp.var[1:t]
-      g.B <- temp.var[(t+1):T]
-
-      n_f <- length(f.B)
-      n_g <- length(g.B)
-
-      #optimal h for f
-      h_f.B <- h_f
-
-      #optimal h for g
-      h_g.B <- h_g
-
-      for(i in 1:length(grid)){
-        est_f.B[i] <- sum(dnorm((grid[i]-f.B)/h_f.B))/(n_f*h_f.B)
+    f <- data[1:t_star]
+    g <- data[(t_star+1):T]
+    n_f <- length(f)
+    n_g <- length(g)
+    #optimal h for f
+    mlcv.f <- matrix(0, length(f))
+    MLCV.f <- function(h_f){
+      for(i in 1:length(f)){
+        mlcv.f[i] <- (sum(dnorm((f[i] - f)/h_f))-dnorm(0))/((n_f-1)*h_f)
       }
-
-      for(i in 1:length(grid)){
-        est_g.B[i] <- sum(dnorm((grid[i]-g.B)/h_g.B))/(n_g*h_g.B)
-      }
-
-      #ISD estimates
-      ISD_hat <- sum((est_f.B-est_g.B)^2)*width
-
-      t <-toString(t)
-      ISDresult.null[t,] <- ISD_hat
+      likelihood.f <- sum(log(mlcv.f))/n_f
+      return(likelihood.f)
     }
-    ISD_sup.null[s] <- max(ISDresult.null)
+    H_f <- optimize(MLCV.f,c(0.001, 100),maximum = TRUE)
+    h_f <- H_f[["maximum"]]
+    #optimal h for g
+    mlcv.g <- matrix(0, length(g))
+    MLCV.g <- function(h_g){
+      for(i in 1:length(g)){
+        mlcv.g[i] <- (sum(dnorm((g[i] - g)/h_g))-dnorm(0))/((n_g-1)*h_g)
+      }
+      likelihood.g <- sum(log(mlcv.g))/n_g
+      return(likelihood.g)
+    }
+    H_g <- optimize(MLCV.g,c(0.001, 100),maximum = TRUE)
+    h_g <- H_g[["maximum"]]
+
+    for (s in 1:S){
+      temp.var <- sample(data,T,replace = FALSE)
+      for (t in breakset){
+        f.B <- temp.var[1:t]
+        g.B <- temp.var[(t+1):T]
+
+        n_f <- length(f.B)
+        n_g <- length(g.B)
+
+        #optimal h for f
+        h_f.B <- h_f
+
+        #optimal h for g
+        h_g.B <- h_g
+
+        for(i in 1:length(grid)){
+          est_f.B[i] <- sum(dnorm((grid[i]-f.B)/h_f.B))/(n_f*h_f.B)
+        }
+
+        for(i in 1:length(grid)){
+          est_g.B[i] <- sum(dnorm((grid[i]-g.B)/h_g.B))/(n_g*h_g.B)
+        }
+
+        #ISD estimates
+        ISD_hat <- sum((est_f.B-est_g.B)^2)*width
+
+        t <-toString(t)
+        ISDresult.null[t,] <- ISD_hat
+      }
+      ISD_sup.null[s] <- max(ISDresult.null)
+
+      end.time<-Sys.time()
+      time.taken<-as.numeric(round(end.time - start.time))
+      if (time.taken!=0 & time.taken%%60==0){
+        print("Recovering the null distribution using randomization method could take some time. Thank you for your patience.")
+      }
+    }
+
+    #p value
+    PV <- rep(0,S)
+    PV[ISD_sup.null>ISD_sup] <- 1
+
+    pvalue <- sum(PV)/S
+
+  } else if (null == "asy"){
+    if (T < 1000){warning("Randomization method is recommended for recovering
+                          the null distribution")}
+    ISD_sup.std <- ISD_sup*sqrt(T)
+    pvalue <- 1-asy.null[which.min(abs(ISD_sup.std-asy.grid))]
   }
-
-  #p value
-  PV <- rep(0,S)
-  PV[ISD_sup.null>ISD_sup] <- 1
-
-  pvalue <- sum(PV)/S
 
   SupISD_results <- list("test statistic" = ISD_sup, "estimated break" = t_star, "p value" = pvalue)
 
