@@ -1,0 +1,79 @@
+countDecimalPlaces <- function(x) {
+  if ((x %% 1) != 0) {
+    strs <- strsplit(as.character(format(x, scientific = F)), "\\.")
+    n <- nchar(strs[[1]][2])
+  } else {
+    n <- 0
+  }
+  return(n) 
+}
+
+width<-0.01
+digits<-countDecimalPlaces(width)
+x<-seq(-5,5,width) #defining the range of X
+
+
+
+pdf.f<-rep(NA,length(x))
+for (i in 1:length(x)){
+  if (x[i]<0) {pdf.f[i]<-dnorm(x[i],0,1.1)} else if (x[i]>=0) {pdf.f[i]<-dnorm(x[i],0,1)}
+}
+plot(x,pdf.f)
+sum(pdf.f)*width
+sum(x*pdf.f)*width
+
+cdf.f<-rep(NA,length(x))
+for (i in 1:length(x)){
+  cdf.f[i]<-sum(pdf.f[1:i])*width
+}
+plot(x,cdf.f)
+
+#Accept-Reject Algorithm
+
+n<-50 #sample size
+
+M<-max(pdf.f)
+sample.f<-c() #sample set
+
+while(length(sample.f)<n){
+  u<-round(runif(1,-5,5),digits)
+  pdf<-pdf.f[which.min(abs(x-u))]
+  if(runif(1)<=pdf/M){sample.f<-c(sample.f,u)}
+}
+plot(density(sample.f))
+
+
+
+
+pdf.g<-rep(NA,length(x))
+for (i in 1:length(x)){
+  if (x[i]<0) {pdf.g[i]<-dnorm(x[i],0,0.9)} else if (x[i]>=0) {pdf.g[i]<-dnorm(x[i],0,1)}
+}
+plot(x,pdf.g)
+sum(pdf.g)*width
+sum(x*pdf.g)*width
+
+cdf.g<-rep(NA,length(x))
+for (i in 1:length(x)){
+  cdf.g[i]<-sum(pdf.g[1:i])*width
+}
+plot(x,cdf.g)
+
+#Accept-Reject Algorithm
+
+M<-max(pdf.g)
+sample.g<-c() #sample set
+
+while(length(sample.g)<n){
+  u<-round(runif(1,-5,5),digits)
+  pdf<-pdf.g[which.min(abs(x-u))]
+  if(runif(1)<=pdf/M){sample.g<-c(sample.g,u)}
+}
+plot(density(sample.g))
+
+Y<-c(sample.f,sample.g)
+mean(Y)
+library(SupISD)
+supisd(Y,width = 0.1, S=200)
+supisd(Y,evalrange.l="mean",width = 0.1, S=200)
+supisd(Y,evalrange.r="mean",width = 0.1, S=200)
