@@ -71,7 +71,7 @@
 
 supisd <- function(data, breakstart = NULL, breakend = NULL, breaklength = NULL,
                    evalrange.l = NULL, evalrange.r = NULL, width = NULL,
-                   null = "ran", S = NULL){
+                   null = "ran", S = NULL, bw = "cv"){
 
   T <- length(data)
   if (T <= 50) {warning("Small sample size")}
@@ -156,29 +156,43 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, breaklength = NULL,
     n_f <- length(f)
     n_g <- length(g)
 
-    #optimal h for f
-    mlcv.f <- matrix(0, length(f))
-    MLCV.f <- function(h_f){
-      for(i in 1:length(f)){
-        mlcv.f[i] <- (sum(dnorm((f[i] - f)/h_f))-dnorm(0))/((n_f-1)*h_f)
+    # Determine h_f based on 'bw' argument
+    if (bw == "cv") {
+      #optimal h for f (Cross Validation)
+      mlcv.f <- matrix(0, length(f))
+      MLCV.f <- function(h_f){
+        for(i in 1:length(f)){
+          mlcv.f[i] <- (sum(dnorm((f[i] - f)/h_f))-dnorm(0))/((n_f-1)*h_f)
+        }
+        likelihood.f <- sum(log(mlcv.f))/n_f
+        return(likelihood.f)
       }
-      likelihood.f <- sum(log(mlcv.f))/n_f
-      return(likelihood.f)
+      H_f <- optimize(MLCV.f,c(0.01, 100),maximum = TRUE)
+      h_f <- H_f[["maximum"]]
+    } else if (bw == "rot") {
+      # Rule of Thumb for f
+      h_f <- bw.nrd0(f)
+    } else {
+      stop("Invalid bw argument. Use 'cv' or 'rot'.")
     }
-    H_f <- optimize(MLCV.f,c(0.01, 100),maximum = TRUE)
-    h_f <- H_f[["maximum"]]
 
-    #optimal h for g
-    mlcv.g <- matrix(0, length(g))
-    MLCV.g <- function(h_g){
-      for(i in 1:length(g)){
-        mlcv.g[i] <- (sum(dnorm((g[i] - g)/h_g))-dnorm(0))/((n_g-1)*h_g)
+    # Determine h_g based on 'bw' argument
+    if (bw == "cv") {
+      #optimal h for g (Cross Validation)
+      mlcv.g <- matrix(0, length(g))
+      MLCV.g <- function(h_g){
+        for(i in 1:length(g)){
+          mlcv.g[i] <- (sum(dnorm((g[i] - g)/h_g))-dnorm(0))/((n_g-1)*h_g)
+        }
+        likelihood.g <- sum(log(mlcv.g))/n_g
+        return(likelihood.g)
       }
-      likelihood.g <- sum(log(mlcv.g))/n_g
-      return(likelihood.g)
+      H_g <- optimize(MLCV.g,c(0.01, 100),maximum = TRUE)
+      h_g <- H_g[["maximum"]]
+    } else if (bw == "rot") {
+      # Rule of Thumb for g
+      h_g <- bw.nrd0(g)
     }
-    H_g <- optimize(MLCV.g,c(0.01, 100),maximum = TRUE)
-    h_g <- H_g[["maximum"]]
 
     #kernel estimates for f
     for(i in 1:length(grid)){
