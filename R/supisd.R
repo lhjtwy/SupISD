@@ -145,7 +145,7 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, breaklength = NULL,
   est_g <- matrix(0, length(grid))
 
   ISDresult <- matrix(0, length(breakset))
-  rownames(ISDresult) <- seq(breakstart,breakend,1)
+  rownames(ISDresult) <- breakset
 
   if (!is.null(S) == FALSE) {S <- 1000}
 
@@ -210,7 +210,7 @@ supisd <- function(data, breakstart = NULL, breakend = NULL, breaklength = NULL,
     est_g.B <- matrix(0, length(grid))
 
     ISDresult.null <- matrix(0, length(breakset))
-    rownames(ISDresult.null) <- seq(breakstart,breakend,1)
+    rownames(ISDresult.null) <- breakset
 
     f <- data[1:t_star]
     g <- data[(t_star+1):T]
