@@ -1,6 +1,6 @@
 library(devtools)
 library(roxygen2)
-setwd("C:/Users/10438/Documents/SupISD")
+#setwd("C:/Users/10438/Documents/SupISD")
 
 document()
 install("C:/Users/10438/Documents/SupISD")

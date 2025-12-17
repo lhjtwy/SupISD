@@ -5,7 +5,7 @@ countDecimalPlaces <- function(x) {
   } else {
     n <- 0
   }
-  return(n) 
+  return(n)
 }
 
 width<-0.01

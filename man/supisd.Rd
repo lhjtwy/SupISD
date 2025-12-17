@@ -8,6 +8,7 @@ supisd(
   data,
   breakstart = NULL,
   breakend = NULL,
+  breaklength = NULL,
   evalrange.l = NULL,
   evalrange.r = NULL,
   width = NULL,
@@ -22,6 +23,9 @@ breaks. Default leaves 20 observations from the start of the data.}
 
 \item{breakend}{a numeric value giving the ending period of all possible
 breaks. Default leaves 20 observations from the end of the data.}
+
+\item{breaklength}{a numeric value giving the length between break points.
+Default is 1.}
 
 \item{evalrange.l}{lower bound of the evaluation support. Either a numeric
 value from 0 to 1 indicating the percentage of data range from the
@@ -62,7 +66,7 @@ possible breaks to be tested should not be too close to the start/end of
 data (leaving at least 20 observations from the start/end is recommended).
 }
 \examples{
-#width and S in examples below are set to reduce running time. 
+#width and S in examples below are set to reduce running time.
 #Still, it may take a few seconds.
 data <- rnorm(100)
 #Tests structural change over the entire domain of data
