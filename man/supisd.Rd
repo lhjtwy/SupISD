@@ -12,6 +12,7 @@ supisd(
   evalrange.l = NULL,
   evalrange.r = NULL,
   width = NULL,
+  null = "ran",
   S = NULL
 )
 }
@@ -42,6 +43,10 @@ maximum of the data.}
 \item{width}{space between the points in the grid for kernel estimation.
 Default results in 500 points at which the density is estimated.}
 
+\item{null}{method to recover null distribution of the test. Either "ran"
+indicating randomization method or "asy" indicating asymptotic
+distribution. Default is randomization method.}
+
 \item{S}{number of simulations for generating the null distribution of the
 test statistic. Default is 1000.}
 }
@@ -60,10 +65,12 @@ in time-series data as proposed in Lu and Ker (2024). The test has power
 against structural change in any moment and can be tailored to a specific
 range of the underlying distribution. The function uses Gaussian kernel
 function and leave-one-out cross validation for finding the optimal bandwidth
-for kernel estimation. Test p value is found via randomization method as
-detailed in Lu and Ker (2024). It is suggested by simulations that the
-possible breaks to be tested should not be too close to the start/end of
-data (leaving at least 20 observations from the start/end is recommended).
+for kernel estimation. Test p value is found via randomization method by
+default setting as it performs better empirically than the asymptotic null
+distribution. However, the latter is also made available in cases of large
+samples. It is suggested by simulations that the possible breaks to be
+tested should not be too close to the start/end of data (leaving at least 20
+observations from the start/end is recommended).
 }
 \examples{
 #width and S in examples below are set to reduce running time.
